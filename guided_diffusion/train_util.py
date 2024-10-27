@@ -186,7 +186,7 @@ class TrainLoop:
                 for k, v in cond.items()
             }
             last_batch = (i + self.microbatch) >= batch.shape[0]
-            t, weights = self.schedule_sampler.sample(micro.shape[0], dist_util.dev())
+            t, weights = self.schedule_sampler.sample(micro.shape[0], dist_util.dev(), micro.shape)
 
             compute_losses = functools.partial(
                 self.diffusion.training_losses,

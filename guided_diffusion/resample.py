@@ -39,7 +39,7 @@ class ScheduleSampler(ABC):
         The weights needn't be normalized, but must be positive.
         """
 
-    def sample(self, batch_size, device):
+    def sample(self, batch_size, device, image_shape=None):
         """
         Importance-sample timesteps for a batch.
 
@@ -51,10 +51,11 @@ class ScheduleSampler(ABC):
         """
         w = self.weights()
         p = w / np.sum(w)
-        indices_np = np.random.choice(len(p), size=(batch_size,), p=p)
+        image_shape = image_shape or (batch_size, )
+        indices_np = np.random.choice(len(p), size=image_shape, p=p)
         indices = th.from_numpy(indices_np).long().to(device)
         weights_np = 1 / (len(p) * p[indices_np])
-        weights = th.from_numpy(weights_np).float().to(device)
+        weights = th.from_numpy(weights_np).float().to(device).expand_as(indices)
         return indices, weights
 
 

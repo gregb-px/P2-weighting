@@ -914,6 +914,9 @@ def _extract_into_tensor(arr, timesteps, broadcast_shape):
     :return: a tensor of shape [batch_size, 1, ...] where the shape has K dims.
     """
     res = th.from_numpy(arr).to(device=timesteps.device)[timesteps].float()
-    while len(res.shape) < len(broadcast_shape):
-        res = res[..., None]
+    # while len(res.shape) < len(broadcast_shape):
+    #     res = res[..., None]
+    if len(res.shape) != len(broadcast_shape):
+        res = res.unsqueeze(1)
+        assert len(res.shape) == len(broadcast_shape)
     return res.expand(broadcast_shape)

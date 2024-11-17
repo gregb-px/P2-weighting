@@ -51,6 +51,9 @@ class ScheduleSampler(ABC):
         """
         w = self.weights()
         p = w / np.sum(w)
+        if image_shape:
+            n, _, h, w = image_shape
+            image_shape = (n, h, w)
         image_shape = image_shape or (batch_size, )
         indices_np = np.random.choice(len(p), size=image_shape, p=p)
         indices = th.from_numpy(indices_np).long().to(device)

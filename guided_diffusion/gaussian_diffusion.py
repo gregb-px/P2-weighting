@@ -262,8 +262,9 @@ class GaussianDiffusion:
         if model_kwargs is None:
             model_kwargs = {}
 
-        B, C = x.shape[:2]
+        B, C, H, W = x.shape
         assert t.shape == (B,)
+        t = t.unsqueeze(-1).unsqueeze(-1).repeat(1, H, W)
         model_output = model(x, self._scale_timesteps(t), **model_kwargs)
 
         if self.model_var_type in [ModelVarType.LEARNED, ModelVarType.LEARNED_RANGE]:

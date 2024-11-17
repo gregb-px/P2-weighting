@@ -265,8 +265,8 @@ class ResBlock(TimestepBlock):
                 pool = nn.AvgPool2d(kernel_size=ratio, stride=ratio)
                 scale = pool(scale)
                 shift = pool(shift)
-                print("scale shape", scale.shape)
-                print("shift shape", shift.shape)
+                # print("scale shape", scale.shape)
+                # print("shift shape", shift.shape)
                 # print("target shape", h.shape)
             h = out_norm(h) * (1 + scale) + shift
             h = out_rest(h)

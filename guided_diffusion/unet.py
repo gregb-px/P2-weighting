@@ -244,10 +244,30 @@ class ResBlock(TimestepBlock):
             h = self.in_layers(x)
         emb_out = self.emb_layers(emb).type(h.dtype)
         while len(emb_out.shape) < len(h.shape):
+            print("WARNING: needed to unsqueeze emb_out!")
             emb_out = emb_out[..., None]
+        if emb_out.shape[-1] == 1 and emb_out.shape[-2] == 1:
+            _, _, h_, w_ = x.shape
+            emb_out = emb_out.permute(0, 2, 3, 1).repeat(1, h_, w_, 1)
+
         if self.use_scale_shift_norm:
             out_norm, out_rest = self.out_layers[0], self.out_layers[1:]
-            scale, shift = th.chunk(emb_out, 2, dim=1)
+            scale, shift = th.chunk(emb_out, 2, dim=-1)
+            scale = scale.permute(0, 3, 1, 2)
+            shift = shift.permute(0, 3, 1, 2)
+            if scale.shape != h.shape:
+                source_size = scale.shape[-1]
+                target_size = h.shape[-1]
+                ratio = source_size // target_size
+                assert target_size * ratio == source_size
+                # print("original scale shape", scale.shape)
+                # print("RATIO:", ratio)
+                pool = nn.AvgPool2d(kernel_size=ratio, stride=ratio)
+                scale = pool(scale)
+                shift = pool(shift)
+                # print("scale shape", scale.shape)
+                # print("shift shape", shift.shape)
+                # print("target shape", h.shape)
             h = out_norm(h) * (1 + scale) + shift
             h = out_rest(h)
         else:

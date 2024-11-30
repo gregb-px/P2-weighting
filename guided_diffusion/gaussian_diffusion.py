@@ -262,8 +262,9 @@ class GaussianDiffusion:
         if model_kwargs is None:
             model_kwargs = {}
 
-        B, C = x.shape[:2]
+        B, C, H, W = x.shape
         assert t.shape == (B,)
+        t = t.unsqueeze(-1).unsqueeze(-1).repeat(1, H, W)
         model_output = model(x, self._scale_timesteps(t), **model_kwargs)
 
         if self.model_var_type in [ModelVarType.LEARNED, ModelVarType.LEARNED_RANGE]:
@@ -914,6 +915,9 @@ def _extract_into_tensor(arr, timesteps, broadcast_shape):
     :return: a tensor of shape [batch_size, 1, ...] where the shape has K dims.
     """
     res = th.from_numpy(arr).to(device=timesteps.device)[timesteps].float()
-    while len(res.shape) < len(broadcast_shape):
-        res = res[..., None]
+    # while len(res.shape) < len(broadcast_shape):
+    #     res = res[..., None]
+    if len(res.shape) != len(broadcast_shape):
+        res = res.unsqueeze(1)
+        assert len(res.shape) == len(broadcast_shape)
     return res.expand(broadcast_shape)

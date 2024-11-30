@@ -54,7 +54,7 @@ def model_and_diffusion_defaults():
         attention_resolutions="16,8",
         channel_mult="",
         dropout=0.0,
-        p2_gamma=0,
+        p2_gamma=0.0,
         p2_k=1,
         class_cond=False,
         use_checkpoint=False,
